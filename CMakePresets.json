@@ -1,0 +1,74 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_CXX_STANDARD": "17",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+            }
+        },
+        {
+            "name": "gcc-debug",
+            "inherits": "default",
+            "displayName": "GCC Debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "gcc-release",
+            "inherits": "default",
+            "displayName": "GCC Release",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "clang-debug",
+            "inherits": "default",
+            "displayName": "Clang Debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang-21",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "clang-release",
+            "inherits": "default",
+            "displayName": "Clang Release",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang-21",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
+        }
+    ]
+}
