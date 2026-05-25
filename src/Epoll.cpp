@@ -1,24 +1,20 @@
 #include "Epoll.h"
+#include "Log.h"
 
 #include <unistd.h>
 #include <cstring>
 #include <errno.h>
 
-Epoll::Epoll()
-    : m_epfd(epoll_create(1)) 
-    {
-        if (m_epfd == -1)
-        {
-            LOG(error) << "epoll_create() err";
-        }
-    }
-
-Epoll::~Epoll()
+Epoll::Epoll() : m_epfd(epoll_create(1))
 {
-    ::close(m_epfd);
+    if (m_epfd == -1) {
+        LOG(error) << "epoll_create() err";
+    }
 }
 
-int Epoll::updatechannel(Channel *pchannel)
+Epoll::~Epoll() { ::close(m_epfd); }
+
+int Epoll::updatechannel(Channel* pchannel)
 {
     struct epoll_event ev;
     ev.data.ptr = pchannel;
@@ -29,17 +25,14 @@ int Epoll::updatechannel(Channel *pchannel)
     if (pchannel->getisinepoll()) // 当前Channel对象已经被epoll监视
     {
         ret = epoll_ctl(m_epfd, EPOLL_CTL_MOD, pchannel->getfd(), &ev);
-        if (ret == -1)  
-        {
+        if (ret == -1) {
             LOG(error) << "epoll_ctl(EPOLL_CTL_MOD) err";
         }
     }
-    else
-    {
+    else {
         pchannel->setisinepoll();
         ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, pchannel->getfd(), &ev);
-        if (ret == -1)
-        {
+        if (ret == -1) {
             LOG(error) << "epoll_ctl(EPOLL_CTL_ADD) err";
         }
     }
@@ -51,18 +44,14 @@ int Epoll::updatechannel(Channel *pchannel)
 int Epoll::removechannel(Channel* pchannel)
 {
     int ret = epoll_ctl(m_epfd, EPOLL_CTL_DEL, pchannel->getfd(), nullptr);
-    if (ret == -1)
-    {
+    if (ret == -1) {
         LOG(error) << "epoll_ctl(EPOLL_CTL_DEL) err";
     }
     return ret;
 }
 
 // 返回m_epfd
-int Epoll::get() const
-{
-    return m_epfd;
-}
+int Epoll::get() const { return m_epfd; }
 
 /**
  * @brief 等待epoll所监听的事件的发生,设置超时时间
@@ -73,12 +62,11 @@ int Epoll::get() const
 vector<Channel*> Epoll::epollwait(int& timeout)
 {
     vector<Channel*> retvec;
-    memset((void *)&m_evs, 0, MAXEVENTS);
+    memset((void*)&m_evs, 0, MAXEVENTS);
     int cnt = epoll_wait(m_epfd, m_evs, MAXEVENTS, timeout);
     if (cnt == -1) // 出错
     {
-        if (errno != EINTR)
-        {
+        if (errno != EINTR) {
             timeout = -1;
             LOG(error) << "epoll_wait() err";
         }
@@ -89,12 +77,10 @@ vector<Channel*> Epoll::epollwait(int& timeout)
         timeout = 0;
         return retvec;
     }
-    else
-    {
+    else {
         timeout = 0;
         retvec.reserve(cnt);
-        for (int i = 0; i < cnt; ++i)
-        {
+        for (int i = 0; i < cnt; ++i) {
             Channel* channel = static_cast<Channel*>(m_evs[i].data.ptr);
             channel->sethappenevents(m_evs[i].events);
             retvec.push_back(channel);

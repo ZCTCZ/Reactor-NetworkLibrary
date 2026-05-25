@@ -1,19 +1,16 @@
 #pragma once
 
-#include "Log.h"
 #include "Socket.h"
 #include "EventLoop.h"
 #include "Connection.h"
 
 #include <sys/epoll.h>
-#include <unordered_map>
 #include <memory>
 #include <functional>
 
-class EventLoop;// 向前声明EventLoop类
+class EventLoop; // 向前声明EventLoop类
 
-class Channel
-{
+class Channel {
 public:
     Channel(EventLoop* pElp, std::shared_ptr<Socket> psocket);
     ~Channel() = default;
@@ -73,12 +70,12 @@ public:
     void setwriteeventcb(const std::function<void()>& func);
 
 private:
-    std::shared_ptr<Socket> m_psocket;          // 每一个Channel对象唯一对应一个Socket对象
-    EventLoop* m_pelp;                          // 每一个Channel对象唯一对应一个EventLoop对象，但是每一个EventLoop对象对应多个Channel对象
-    bool m_isinepoll = false;                   // 记录当前Channel对象是否加入到了Epoll对象的监测中
-    uint32_t m_events = 0;                      // 需要监视的事件
-    uint32_t m_happenevents = 0;                // epoll监视到已经发生的事件
-    std::function<void()> m_readeventcb;        // epoll监视到的EPOLLIN类型的事件的回调函数
-    std::function<void()> m_closeconnectioncb;  // 析构Connection对象的回调函数
-    std::function<void()> m_writeeventcb;       // epoll监视到EPOLLOUT类型的事件的回调函数
+    std::shared_ptr<Socket> m_psocket; // 每一个Channel对象唯一对应一个Socket对象
+    EventLoop* m_pelp; // 每一个Channel对象唯一对应一个EventLoop对象，但是每一个EventLoop对象对应多个Channel对象
+    bool m_isinepoll = false; // 记录当前Channel对象是否加入到了Epoll对象的监测中
+    uint32_t m_events = 0; // 需要监视的事件
+    uint32_t m_happenevents = 0; // epoll监视到已经发生的事件
+    std::function<void()> m_readeventcb; // epoll监视到的EPOLLIN类型的事件的回调函数
+    std::function<void()> m_closeconnectioncb; // 析构Connection对象的回调函数
+    std::function<void()> m_writeeventcb; // epoll监视到EPOLLOUT类型的事件的回调函数
 };

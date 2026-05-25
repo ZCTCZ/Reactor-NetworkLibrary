@@ -1,23 +1,15 @@
 #include "EventFd.h"
 
-EventFd::EventFd()
-    :m_eventfd(eventfd(0, EFD_NONBLOCK))
-{}
+EventFd::EventFd() : m_eventfd(eventfd(0, EFD_NONBLOCK)) {}
 
-EventFd::~EventFd()
-{
-    ::close(m_eventfd);
-}
+EventFd::~EventFd() { ::close(m_eventfd); }
 
-int EventFd::fd() const
-{
-    return m_eventfd;
-}
+int EventFd::fd() const { return m_eventfd; }
 
 // 唤醒事件循环
 void EventFd::wakeup()
 {
-    uint64_t val;
+    uint64_t val = 1;
     write(m_eventfd, &val, 8); // 向m_wakeupfd 里面写入数据，会唤醒epoll_wait
 }
 

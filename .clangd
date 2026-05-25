@@ -1,9 +1,5 @@
 CompileFlags:
   Add:
-    - -std=c++23
-    - -stdlib=libc++
     - -Wunused-parameter
     - -Wundefined-internal
-  BuiltinHeaders: QueryDriver
-  Compiler: /usr/bin/clang++-21
   CompilationDatabase: build/clang-debug

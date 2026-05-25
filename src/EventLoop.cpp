@@ -2,43 +2,37 @@
 
 #include <atomic>
 
-EventLoop::EventLoop(bool ismainpool)
-    : m_pep(std::make_unique<Epoll>()), // 创建epoll
-      m_stop(false),                    // 事件循环停止表示为false
-      m_ismmainloop(ismainpool),
-      m_eventfd(), // 创建 eventfd
-      m_pwakechannel(std::make_unique<Channel>(this, std::make_shared<Socket>(m_eventfd.fd()))),
-      m_timer(), // 定时器对象，使用Timer类默认的闹钟时间
-      m_ptimerchannel(std::make_unique<Channel>(this, std::make_shared<Socket>(m_timer.fd())))
+EventLoop::EventLoop(bool ismainpool) :
+    m_pep(std::make_unique<Epoll>()), // 创建epoll
+    m_stop(false), // 事件循环停止表示为false
+    m_ismmainloop(ismainpool), m_eventfd(), // 创建 eventfd
+    m_pwakechannel(std::make_unique<Channel>(this, std::make_shared<Socket>(m_eventfd.fd()))),
+    m_timer(), // 定时器对象，使用Timer类默认的闹钟时间
+    m_ptimerchannel(std::make_unique<Channel>(this, std::make_shared<Socket>(m_timer.fd())))
 {
     // 设置 事件循环检测到 eventfd 可读之后的回调函数
-    m_pwakechannel->setreadeventcb([this]()
-                                   { handleWakeUp(); });
+    m_pwakechannel->setreadeventcb([this]() { handleWakeUp(); });
 
     // 将 eventfd 加入到epoll的事件循环检测中
     m_pwakechannel->enablereading();
 
     // 设置 事件循环检测到定时器超时 之后的回调函数
-    m_ptimerchannel->setreadeventcb([this]()
-                                    { handleTimer(); });
+    m_ptimerchannel->setreadeventcb([this]() { handleTimer(); });
 
     // 让事件循环检测定时器的读事件
     m_ptimerchannel->enablereading();
 }
 
-EventLoop::~EventLoop()
-{
-}
+EventLoop::~EventLoop() {}
 
 // 开启事件循环
 void EventLoop::loop()
 {
     m_threadid = syscall(SYS_gettid); // 获取事件循环所在线程的线层ID
 
-    while (!m_stop.load())
-    {
+    while (!m_stop.load()) {
         int timeout = 10; // 超时时间10ms
-        vector<Channel *> channels = m_pep->epollwait(timeout);
+        vector<Channel*> channels = m_pep->epollwait(timeout);
         int fdCnt = channels.size();
 
         if (fdCnt == 0) // 出错或者超时
@@ -57,10 +51,8 @@ void EventLoop::loop()
                 return;
             }
         }
-        else if (fdCnt > 0)
-        {
-            for (int i = 0; i < fdCnt; ++i)
-            {
+        else if (fdCnt > 0) {
+            for (int i = 0; i < fdCnt; ++i) {
                 channels[i]->handleevents();
             }
 
@@ -78,28 +70,16 @@ void EventLoop::stop()
 }
 
 // 设置 m_handletimeout
-void EventLoop::sethandletimeout(std::function<void(EventLoop *)> func)
-{
-    m_handletimeout = func;
-}
+void EventLoop::sethandletimeout(std::function<void(EventLoop*)> func) { m_handletimeout = func; }
 
 // 将Channel添加到事件循环，或者修改Channel在事件循环上面的事件
-void EventLoop::updateChannel(Channel *pchannel)
-{
-    m_pep->updatechannel(pchannel);
-}
+void EventLoop::updateChannel(Channel* pchannel) { m_pep->updatechannel(pchannel); }
 
 // 将Channel从事件循环中删除
-void EventLoop::removeChannel(Channel *pchannel)
-{
-    m_pep->removechannel(pchannel);
-}
+void EventLoop::removeChannel(Channel* pchannel) { m_pep->removechannel(pchannel); }
 
 // 判断当前线程是不是I/O线程，m_threadid里记录的是每个I/O线程的线程号
-bool EventLoop::isEventLoopThread()
-{
-    return m_threadid == syscall(SYS_gettid);
-}
+bool EventLoop::isEventLoopThread() { return m_threadid == syscall(SYS_gettid); }
 
 // 将任务加入到任务队列中
 void EventLoop::addTask(std::function<void()> func)
@@ -121,8 +101,7 @@ void EventLoop::handleWakeUp()
     {
         // 从任务队列里面取出任务执行，这是在I/O线程中进行的
         std::lock_guard<std::mutex> lock(m_mtx);
-        while (!m_taskqueue.empty())
-        {
+        while (!m_taskqueue.empty()) {
             std::function<void()> func = std::move(m_taskqueue.front()); // I/O线程执行
             func();
             m_taskqueue.pop();
@@ -158,8 +137,7 @@ void EventLoop::updateConnection(int fd)
 {
     std::lock_guard<std::mutex> lock(m_mtx);
     auto it = m_connectionmap.find(fd);
-    if (it != m_connectionmap.end())
-    {
+    if (it != m_connectionmap.end()) {
         m_lruconnection.splice(m_lruconnection.begin(), m_lruconnection, it->second);
     }
 }
@@ -173,13 +151,11 @@ void EventLoop::removeTimeOutConnection(time_t interval)
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         // 2. 在一个严格的锁作用域内，安全地遍历和和删除 m_lruconnection里面的超时Connection连接
-        while (!m_lruconnection.empty())
-        {
+        while (!m_lruconnection.empty()) {
             auto connWptr = m_lruconnection.back();
             if (auto connSptr = connWptr.lock()) // 尝试提升为shared_ptr,如果提升成功，说明该Connection连接没断开
             {
-                if (connSptr->isTimeOut(interval))
-                {
+                if (connSptr->isTimeOut(interval)) {
                     timeoutfds.push_back(connSptr->fd()); // 收集 fd,稍后从TcpServer持有的Connectionmap里面删除
                     m_connectionmap.erase(connSptr->fd());
                     m_lruconnection.pop_back();
@@ -196,40 +172,28 @@ void EventLoop::removeTimeOutConnection(time_t interval)
         }
     }
 
-    for (auto fd : timeoutfds)
-    {
+    for (auto fd : timeoutfds) {
         m_timerCallback(fd);
     }
 }
 
 // 设置m_timerCallback，用来删除TcpServer对象的 map里面的Connection连接
-void EventLoop::settimerCallback(std::function<void(int)> func)
-{
-    m_timerCallback = func;
-}
+void EventLoop::settimerCallback(std::function<void(int)> func) { m_timerCallback = func; }
 
 // 设置 m_delayDeleteCallback
-void EventLoop::setdelayDeleteCallback(std::function<void(int)> func)
-{
-    m_delayDeleteCallback = func;
-}
+void EventLoop::setdelayDeleteCallback(std::function<void(int)> func) { m_delayDeleteCallback = func; }
 
 // 将Connection的fd添加到m_delayDeleteConnectionfd里
-void EventLoop::delayDelete(int fd)
-{
-    m_delayDeleteConnectionfd.insert(fd);
-}
+void EventLoop::delayDelete(int fd) { m_delayDeleteConnectionfd.insert(fd); }
 
 // 删除m_delayDeleteConnectionfd里面所有的连接，并清空m_delayDeleteConnectionfd
 void EventLoop::deleteConnection()
 {
     {
         std::lock_guard<std::mutex> lock(m_mtx);
-        for (auto fd : m_delayDeleteConnectionfd)
-        {
+        for (auto fd : m_delayDeleteConnectionfd) {
             auto it = m_connectionmap.find(fd);
-            if (it != m_connectionmap.end())
-            {
+            if (it != m_connectionmap.end()) {
                 m_lruconnection.erase(it->second);
                 m_connectionmap.erase(it); // 删除 m_connectionmap 里面已经断开的连接的映射
             }
@@ -237,8 +201,7 @@ void EventLoop::deleteConnection()
     }
 
     // 删除 TcpServer 对象的Connection连接
-    for (auto fd : m_delayDeleteConnectionfd)
-    {
+    for (auto fd : m_delayDeleteConnectionfd) {
         m_delayDeleteCallback(fd);
     }
 

@@ -8,8 +8,7 @@
 
 #include <unordered_map>
 
-class TcpServer
-{
+class TcpServer {
 public:
     TcpServer(const std::string& ip, uint16_t port, uint16_t nums = 3);
     ~TcpServer();
@@ -27,7 +26,7 @@ public:
     void deleteconnection(int fd);
 
     // 处理Connection对象接收到的客户端发送过来的一条完整的数据
-    void handlemessage(std::shared_ptr<Connection> pConn, Buffer* buffer); 
+    void handlemessage(std::shared_ptr<Connection> pConn, Buffer* buffer);
 
     // 当Connection输出缓冲区里的数据已经全部发送出去后，调用该函数，处理之后的逻辑
     void sendcomplete(std::shared_ptr<Connection>);
@@ -54,11 +53,11 @@ public:
     void removeTimeOutConnection(int fd);
 
 private:
-    std::unique_ptr<EventLoop> m_pmainloop;               // 主事件循环, 只负责客户端建立新连接的请求
-    Acceptor m_acceptor;                                  // 连接器
-    std::vector<std::unique_ptr<EventLoop>> m_psubloop;   // 从事件循环，负责已建立连接的客户端的I/O请求
-    uint16_t m_threadsnums;                               // 子线程个数，同时也是从事件循环的个数
-    ThreadPool m_threadpool;                              // 线程池，里面的每个线程负责运行一个事件循环
+    std::unique_ptr<EventLoop> m_pmainloop; // 主事件循环, 只负责客户端建立新连接的请求
+    Acceptor m_acceptor; // 连接器
+    std::vector<std::unique_ptr<EventLoop>> m_psubloop; // 从事件循环，负责已建立连接的客户端的I/O请求
+    uint16_t m_threadsnums; // 子线程个数，同时也是从事件循环的个数
+    ThreadPool m_threadpool; // 线程池，里面的每个线程负责运行一个事件循环
     std::unordered_map<int, std::shared_ptr<Connection>> m_clientConnectionMap; // 记录套接字和Connection连接的映射
     std::mutex m_mtx;
 
@@ -66,6 +65,7 @@ private:
     std::function<void(const std::shared_ptr<Socket>)> m_handlecreateconnectioncb; // 回调函数，建立新的Connection连接
     std::function<void(int)> m_handledeleteconnectioncb; // 回调函数，删除Connection连接
     std::function<void(std::shared_ptr<Connection>, Buffer*)> m_handlemessage; // 回调函数，处理客户端发送过来的数据
-    std::function<void(std::shared_ptr<Connection>)> m_handlesendcomplete; // 回调函数，完成处理结果发送给客户端之后的业务逻辑
+    std::function<void(std::shared_ptr<Connection>)>
+        m_handlesendcomplete; // 回调函数，完成处理结果发送给客户端之后的业务逻辑
     std::function<void(EventLoop*)> m_handleeventlooptimeout; // 回调函数，处理事件循环超时
 };

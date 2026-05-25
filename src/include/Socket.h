@@ -1,10 +1,8 @@
 #pragma once
 
 #include "InetAddress.h"
-#include "Log.h"
 
-class Socket
-{
+class Socket {
 public:
     Socket(int fd = 0);
     Socket(int fd, InetAddress clientaddr);

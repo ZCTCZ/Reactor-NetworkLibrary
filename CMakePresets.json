@@ -19,7 +19,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
             }
         },
         {
@@ -29,7 +30,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
             }
         },
         {
@@ -39,7 +41,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/clang-21",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
             }
         },
         {
@@ -49,7 +52,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/clang-21",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
             }
         }
     ],

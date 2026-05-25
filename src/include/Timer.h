@@ -1,12 +1,10 @@
 #pragma once
-#include "Log.h"
 
 #include <sys/timerfd.h>
 #include <chrono>
 #include <unistd.h>
 
-class Timer
-{
+class Timer {
 public:
     Timer(std::chrono::nanoseconds first = std::chrono::seconds(7),
           std::chrono::nanoseconds interval = std::chrono::seconds(7)); // 默认每次闹钟定时时间都是 7

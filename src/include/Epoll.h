@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Channel.h"
-#include "Log.h"
 
 #include <sys/epoll.h>
 #include <vector>
@@ -9,8 +8,7 @@
 using std::vector;
 class Channel; // 向前声明Channel类
 
-class Epoll
-{
+class Epoll {
 public:
     Epoll();
 
@@ -27,7 +25,7 @@ public:
 
     /**
      * @brief 等待epoll所监听的事件的发生,设置超时时间
-     * 
+     *
      * @param timeout 超时时间，传入传出参数。若传出值为-1，说明发生了错误，若传出值为0，说明没有发生错误。
      * @return vector<struct epoll_event> 若为空，说明发生了错误或者超时时间到，需要结合timeout的传出值来区分。
      */

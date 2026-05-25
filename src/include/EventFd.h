@@ -4,12 +4,11 @@
 #include <unistd.h>
 
 // 封装eventfd的类
-class EventFd
-{
+class EventFd {
 public:
     EventFd();
     ~EventFd();
-    
+
     // 获取eventfd
     int fd() const;
 

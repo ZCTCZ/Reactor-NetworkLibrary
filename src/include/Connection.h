@@ -8,14 +8,13 @@
 #include <atomic>
 #include <functional>
 
-class Channel; //向前声明Channel类
-class EventLoop; //向前声明EventLoop类
+class Channel; // 向前声明Channel类
+class EventLoop; // 向前声明EventLoop类
 class Socket;
 
 
 // 管理 通信套接字、和通信套接字关联的Channel
-class Connection : public std::enable_shared_from_this<Connection>
-{
+class Connection : public std::enable_shared_from_this<Connection> {
 public:
     Connection(std::shared_ptr<Socket> psocket, EventLoop* ploop);
     ~Connection();

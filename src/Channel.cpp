@@ -1,11 +1,12 @@
 #include "Channel.h"
+#include "Log.h"
 
 #include <sstream>
 #include <iostream>
 #include <cstring>
+#include <utility>
 
-Channel::Channel(EventLoop* pElp, std::shared_ptr<Socket> psocket)
-    : m_pelp(pElp), m_psocket(psocket) {}
+Channel::Channel(EventLoop* pElp, std::shared_ptr<Socket> psocket) : m_pelp(pElp), m_psocket(std::move(psocket)) {}
 
 // 获取当前时间，格式 Y-M-D h:m:s
 // std::string current_time_str()
@@ -29,34 +30,19 @@ Channel::Channel(EventLoop* pElp, std::shared_ptr<Socket> psocket)
 // }
 
 // 返回 m_psocket->fd()
-int Channel::getfd() const
-{
-    return m_psocket->fd();
-}
+int Channel::getfd() const { return m_psocket->fd(); }
 
 // 设置 m_isinepoll 成员
-void Channel::setisinepoll()
-{
-    m_isinepoll = true;
-}
+void Channel::setisinepoll() { m_isinepoll = true; }
 
 // 返回 m_isinepoll 成员
-bool Channel::getisinepoll() const
-{
-    return m_isinepoll;
-}
+bool Channel::getisinepoll() const { return m_isinepoll; }
 
 // 设置 m_events 成员
-void Channel::setevents(uint32_t ev)
-{
-    m_events |= ev;
-}
+void Channel::setevents(uint32_t ev) { m_events |= ev; }
 
 // 返回 m_events 成员
-uint32_t Channel::getevents() const
-{
-    return m_events;
-}
+uint32_t Channel::getevents() const { return m_events; }
 
 // 设置 happenevents 成员
 void Channel::sethappenevents(uint32_t ev)
@@ -65,16 +51,10 @@ void Channel::sethappenevents(uint32_t ev)
 }
 
 // 返回 happenevents 成员
-uint32_t Channel::gethappenevents() const
-{
-    return m_happenevents;
-}
+uint32_t Channel::gethappenevents() const { return m_happenevents; }
 
 // 设置 ET模式
-void Channel::setepollet()
-{
-    m_events |= EPOLLET;
-}
+void Channel::setepollet() { m_events |= EPOLLET; }
 
 // 让 epoll 监视 Channel 对象的读事件
 void Channel::enablereading()
@@ -124,19 +104,17 @@ void Channel::handleevents()
     if (m_happenevents & EPOLLRDHUP) // 对端客户端关闭了连接
     {
         std::ostringstream oss;
-        oss << "ip=" << m_psocket->getip()
-            << ",port=" << m_psocket->getport()
-            << ",fd=" << m_psocket->fd()
+        oss << "ip=" << m_psocket->getip() << ",port=" << m_psocket->getport() << ",fd=" << m_psocket->fd()
             << " disconnected";
         LOG(info) << oss.str();
 
         m_closeconnectioncb();
-        return ;
+        return;
     }
 
     if (m_happenevents & (EPOLLIN | EPOLLPRI)) // 读缓冲区里面有数据
     {
-        m_readeventcb(); 
+        m_readeventcb();
     }
 
     if (m_happenevents & EPOLLOUT) // 可以向对端发送数据
@@ -146,19 +124,10 @@ void Channel::handleevents()
 }
 
 // 设置 m_readeventcb
-void Channel::setreadeventcb(const std::function<void()> &func)
-{
-    m_readeventcb = func;
-}
+void Channel::setreadeventcb(const std::function<void()>& func) { m_readeventcb = func; }
 
 // 设置 m_closecb
-void Channel::setcloseconnectioncb(const std::function<void()> &func)
-{
-    m_closeconnectioncb = func;
-}
+void Channel::setcloseconnectioncb(const std::function<void()>& func) { m_closeconnectioncb = func; }
 
 // 设置 m_writeeventcb
-void Channel::setwriteeventcb(const std::function<void()>& func)
-{
-    m_writeeventcb = func;
-}
+void Channel::setwriteeventcb(const std::function<void()>& func) { m_writeeventcb = func; }
