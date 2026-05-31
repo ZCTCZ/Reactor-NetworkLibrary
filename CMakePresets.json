@@ -42,7 +42,7 @@
                 "CMAKE_C_COMPILER": "/usr/bin/clang-21",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
+                "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
             }
         },
         {
@@ -53,7 +53,7 @@
                 "CMAKE_C_COMPILER": "/usr/bin/clang-21",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
+                "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
             }
         }
     ],
